@@ -1,0 +1,302 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pawtons 🐾⚛️ — Atomic dog button</title>
+  <style>
+    :root {
+      --bg: #0f172a;      /* slate-900 */
+      --card: #111827;    /* gray-900 */
+      --text: #e5e7eb;    /* gray-200 */
+      --muted: #9ca3af;   /* gray-400 */
+      --accent: #22d3ee;  /* cyan-400 */
+      --accent-2: #a78bfa;/* violet-400 */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 800px at 30% -10%, rgba(167,139,250,0.15), transparent 60%),
+                  radial-gradient(1000px 700px at 120% 20%, rgba(34,211,238,0.12), transparent 60%),
+                  var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      padding: 24px;
+    }
+    .card {
+      width: min(900px, 95vw);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+      padding: 28px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 3.2vw, 36px);
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: .5ch;
+    }
+    .tagline {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #0b1020;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 6px 16px rgba(34,211,238,0.35), inset 0 0 0 1px rgba(255,255,255,0.38);
+      transition: transform .06s ease, filter .15s ease;
+    }
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: translateY(1px) scale(0.99); }
+
+    .status {
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    figure {
+      margin: 16px 0 0;
+    }
+    .dog-wrap {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #0b1225;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    img {
+      display: block;
+      width: 100%;
+      max-height: 62vh;
+      object-fit: contain;
+      background: #0b1225;
+      transition: opacity .25s ease;
+    }
+    .caption {
+      margin: 10px 4px 0;
+      font-style: italic;
+      text-align: center;
+      font-size: clamp(16px, 2.2vw, 20px);
+    }
+    .footer {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: .85rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Pawtons <span aria-hidden="true">🐾⚛️</span></h1>
+    <p class="tagline">Atomic-powered pups delivering agile, design, delivery, strategy, and full-stack joy — on demand.</p>
+
+    <div class="controls">
+      <button id="fetchBtn" type="button" aria-describedby="status">Show me a dog</button>
+      <span id="status" class="status">Ready.</span>
+    </div>
+
+    <figure>
+      <div class="dog-wrap">
+        <img id="dogImg" alt="Random dog from Dog CEO API" src="" style="opacity:0" />
+      </div>
+      <figcaption id="saying" class="caption" aria-live="polite"></figcaption>
+    </figure>
+
+    <div class="footer">
+      <div>Powered by Dog CEO API • Built at Atomic</div>
+      <div><span aria-hidden="true">⇧</span> Click the button anytime — no sprint timing required.</div>
+    </div>
+  </main>
+
+  <script>
+    // ---- Non-repeating sayings: shuffled queue that cycles when exhausted ----
+    const ALL_SAYINGS = [
+      // General Agile/Dev
+      "This dog believes in agile over waterfall 🐾",
+      "Keep it iterative, keep it paw-sitive 🐶",
+      "Working software beats perfect bark-ups 💻",
+      "Responding to change… and squirrels 🐿️",
+      "User stories: fetch-sized, not elephant-sized 🐕",
+      "This pup thrives on continuous delivery 🚚",
+      "The backlog is long, but the treats are many 🍖",
+      "MVP = Most Valuable Pup 🐾",
+      "Velocity isn’t everything — wagging tails matter too 🐕‍🦺",
+      "Pair paw-gramming makes everything smoother 👩‍💻🐶",
+      "No scope creep, just leash creep 🦮",
+      "Refactor often, like burying old bones 🦴",
+      "Strong opinions, loosely leashed 🐾",
+
+      // Product Strategy
+      "This dog only fetches features with real customer value 🎯",
+      "Don’t chase cars — chase outcomes 🏁",
+      "Prioritize bones over shiny squirrels 🐿️",
+      "Strategy is choosing which hydrants not to visit 🚰",
+      "Vision: more tennis balls, fewer distractions 🎾",
+      "This pup believes in product-market fetch 📈",
+      "Roadmaps are like walks — flexible and fun 🚶",
+      "Outcomes over outputs — more belly rubs, fewer checkboxes ✅",
+      "Always validate before you fetch 🔍",
+      "Measure what matters — treats per minute 🍪",
+
+      // Delivery Lead / Project Management
+      "This pupper is your servant leader 🐾",
+      "Risks are like squirrels — spot them early 🐿️",
+      "Facilitation is just structured herding 🐕",
+      "Blockers removed, bones delivered ✅",
+      "Trust the process — and the pack 🐺",
+      "Stakeholder alignment? Sit, stay, good human 👍",
+      "No surprises, except adorable ones 🐶",
+      "This dog keeps the project on a short leash 🦮",
+      "Timebox everything — even naps 💤",
+      "Dogs don’t scope creep, they scope sniff 👃",
+
+      // Design
+      "Good design is invisible — unlike my wagging tail 🎨",
+      "Test early, test often — like sniffing new paths 🔬",
+      "Empathy is a designer’s superpower… and a dog’s ❤️",
+      "Wireframes are chew-toy prototypes 🧸",
+      "Delight your users like a surprise belly rub ✨",
+      "Design for humans, approved by dogs ✅",
+      "This pup prototypes in sticks and tennis balls 🎾",
+      "Accessibility: all paws welcome ♿🐾",
+      "Contrast high, tails higher 📐",
+
+      // Full-Stack Development
+      "Front-bark and back-bark — full stack all the way 🐕",
+      "This dog ships features nose to tail 🚢",
+      "Merge conflicts resolved with a wag 🤝",
+      "Unit tests pass, treats dispensed ✅",
+      "Logs aren’t just for chewing 🌲",
+      "Code smells? I’ll sniff them out 👃",
+      "DevOps? More like DogOps 🐾",
+      "Latency low, tail high ⏱️",
+      "99.9% uptime, 100% cute 🐶",
+
+      // Atomic culture / sciencey
+      "Proton-powered pup positivity ⚛️",
+      "Spin up your day with a Pawton 🌀",
+      "Balanced like protons, neutrons, and snacks ⚖️",
+      "Human-centered, dog-approved 💡",
+      "Craft is caring — even with sticks 🪵",
+      "Team > individual — pack > lone wolf 🐺",
+      "Atomic energy, canine joy ⚛️🐶",
+      "Outcome-driven fetch, not output-driven bark 🎯",
+      "Dog is just ‘God’ in pair-programming mode 😉",
+      "The Definition of Done: treats delivered 🍪",
+
+      // Timeless any-moment morale
+      "You’ve got this — this dog said so 💪🐶",
+      "Tiny step, big wag ✨",
+      "When in doubt, reduce scope (not snacks) 🐾",
+      "Breathe, fetch, iterate 🔁",
+      "A good day to ship something small 🚀",
+      "Focus mode: enabled — squirrel filters on 🐿️🚫",
+      "Kindness is a force multiplier ❤️",
+      "Clarity first, then fetch 🧭",
+      "Learning > perfect — tails up 📚",
+      "High-five, low-latency 🙌"
+    ];
+
+    let sayingQueue = [];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function refillQueue() {
+      sayingQueue = shuffle([...ALL_SAYINGS]);
+    }
+
+    function nextSaying() {
+      if (sayingQueue.length === 0) refillQueue();
+      return sayingQueue.pop();
+    }
+
+    // ---- DOM elements ----
+    const btn = document.getElementById('fetchBtn');
+    const img = document.getElementById('dogImg');
+    const caption = document.getElementById('saying');
+    const status = document.getElementById('status');
+
+    async function getDog() {
+      status.textContent = "Fetching a very good dog…";
+      btn.disabled = true;
+
+      try {
+        // cache-busting param to avoid stale images in some browsers/CDNs
+        const url = `https://dog.ceo/api/breeds/image/random?cb=${Date.now()}`;
+        const res = await fetch(url, { headers: { "Accept": "application/json" }});
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Load image and only then swap (for nicer UX)
+        const newSrc = data.message;
+        await new Promise((resolve, reject) => {
+          const test = new Image();
+          test.onload = resolve;
+          test.onerror = reject;
+          test.src = newSrc;
+        });
+
+        img.style.opacity = 0;
+        // small delay to let opacity transition feel smooth
+        setTimeout(() => { img.src = newSrc; img.style.opacity = 1; }, 60);
+
+        caption.textContent = nextSaying();
+        status.textContent = "Ready.";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Woof! Could not fetch a dog. Try again.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // First load: prepare sayings and fetch a dog right away
+    refillQueue();
+    getDog();
+
+    // Button handler
+    btn.addEventListener('click', getDog);
+  </script>
+</body>
+</html>
+```
+Add Pawtons index.html
